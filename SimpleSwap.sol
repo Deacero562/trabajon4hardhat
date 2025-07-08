@@ -77,7 +77,7 @@ contract LiquidityToken is ILiquidityToken {
     }
 }
 
-contract SimpleUniswapRouter {
+contract SimpleSwap {
     struct Reserves {
         uint256 reserveA;
         uint256 reserveB;
@@ -94,14 +94,16 @@ contract SimpleUniswapRouter {
         return tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
     }
 
-    function _getLiquidityToken(address tokenA, address tokenB) internal returns (ILiquidityToken) {
+    function _createLiquidityToken(address token0, address token1) internal returns (ILiquidityToken) {
+        LiquidityToken lqt = new LiquidityToken();
+        _liquidityTokens[token0][token1] = lqt;
+        _liquidityTokens[token1][token0] = lqt;
+        return lqt;
+    }
+
+    function getLiquidityToken(address tokenA, address tokenB) public view returns (address) {
         (address token0, address token1) = _sortTokens(tokenA, tokenB);
-        if (address(_liquidityTokens[token0][token1]) == address(0)) {
-            LiquidityToken lqt = new LiquidityToken();
-            _liquidityTokens[token0][token1] = lqt;
-            _liquidityTokens[token1][token0] = lqt;
-        }
-        return _liquidityTokens[token0][token1];
+        return address(_liquidityTokens[token0][token1]);
     }
 
     function getReserves(address tokenA, address tokenB) public view returns (uint256 reserveA, uint256 reserveB) {
@@ -131,6 +133,12 @@ contract SimpleUniswapRouter {
         (address token0, address token1) = _sortTokens(tokenA, tokenB);
         (uint256 reserve0, uint256 reserve1) = getReserves(token0, token1);
 
+        if (address(_liquidityTokens[token0][token1]) == address(0)) {
+            _createLiquidityToken(token0, token1);
+            reserve0 = 0;
+            reserve1 = 0;
+        }
+
         if (reserve0 == 0 && reserve1 == 0) {
             amountA = amountADesired;
             amountB = amountBDesired;
@@ -151,8 +159,9 @@ contract SimpleUniswapRouter {
         IERC20(tokenA).transferFrom(msg.sender, address(this), amountA);
         IERC20(tokenB).transferFrom(msg.sender, address(this), amountB);
 
-        ILiquidityToken lqt = _getLiquidityToken(token0, token1);
+        ILiquidityToken lqt = _liquidityTokens[token0][token1];
         uint256 totalSupply = lqt.totalSupply();
+
         if (totalSupply == 0) {
             liquidity = sqrt(amountA * amountB);
         } else {
@@ -180,7 +189,8 @@ contract SimpleUniswapRouter {
         require(liquidity > 0, "Zero liquidity");
 
         (address token0, address token1) = _sortTokens(tokenA, tokenB);
-        ILiquidityToken lqt = _getLiquidityToken(token0, token1);
+        ILiquidityToken lqt = _liquidityTokens[token0][token1];
+        require(address(lqt) != address(0), "No liquidity token");
         uint256 totalSupply = lqt.totalSupply();
         require(totalSupply > 0, "No liquidity");
 
@@ -191,6 +201,7 @@ contract SimpleUniswapRouter {
         require(amountB >= amountBMin, "Insufficient B");
 
         lqt.burn(msg.sender, liquidity);
+
         _reserves[token0][token1].reserveA -= amountA;
         _reserves[token0][token1].reserveB -= amountB;
 
