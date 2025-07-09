@@ -8,6 +8,24 @@ Este repositorio contiene el contrato inteligente `SimpleSwap` que simula una DE
 
 simple-swap/
 ├── contracts/
+│   ├── TokenA.sol             # Token ERC20 A
+│   ├── TokenB.sol             # Token ERC20 B
+│   └── SimpleSwap.sol         # Contrato principal de intercambio
+│
+├── test/
+│   └── SimpleSwap.test.js     # Pruebas unitarias con Hardhat
+│
+├── scripts/
+│   └── deploy.js              # Script de despliegue en la red
+│
+├── hardhat.config.js          # Configuración de Hardhat
+├── package.json               # Dependencias del proyecto
+├── README.md                  # Documentación del proyecto
+└── .env                       # Variables de entorno (NO subir al repo)
+
+
+simple-swap/
+├── contracts/
 │ ├── TokenA.sol
 │ ├── TokenB.sol
 │ └── SimpleSwap.sol
