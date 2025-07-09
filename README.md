@@ -52,21 +52,11 @@ npx hardhat coverage
 
 ✅ Requisitos cumplidos
 
-    ✅ Interacción con el contrato desde frontend (ver index.html en GitHub Pages)
-
     ✅ Testing con Hardhat
 
     ✅ 50%+ de cobertura con npx hardhat coverage
 
-    ✅ Recomendaciones del instructor implementadas
-
     ✅ Repositorio en GitHub
-
-    ✅ Despliegue en Sepolia
-
-    ✅ Conexión a wallet desde front-end
-
-    ✅ Swaps y liquidez operativos
 
 📬 Contacto
 
